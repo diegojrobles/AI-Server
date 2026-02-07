@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from app.model_handler import ModelHandler
 from config.settings import Config
 import logging
@@ -9,6 +11,13 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app)  # Enable cross-origin requests
+
+# Initialize rate limiter
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["100 per hour"]
+)
 
 # Initialize model
 model_handler = ModelHandler()
@@ -33,6 +42,7 @@ def health_check():
     }), 200
 
 @app.route('/predict', methods=['POST'])
+@limiter.limit("10 per minute")
 @require_api_key
 def predict():
     """Main prediction endpoint"""
