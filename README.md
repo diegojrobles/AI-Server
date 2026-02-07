@@ -29,3 +29,41 @@ A production-ready REST API server for running AI models.
 ```
 
 4. Create `.env` file:
+
+HOST=0.0.0.0
+PORT=5000
+DEBUG=True
+MODEL_NAME=distilbert-base-uncased-finetuned-sst-2-english
+API_KEY=your-secret-key-here
+
+5. Run the server:
+```bash
+   python run.py
+```
+
+## API Endpoints
+
+### Health Check
+```bash
+GET /health
+```
+
+### Predict
+```bash
+POST /predict
+Headers: X-API-Key: your-secret-key-here
+Body: {"text": "Your text here"}
+```
+
+### List Models
+```bash
+GET /models
+```
+
+## Testing
+```bash
+python test_server.py
+```
+
+## License
+MIT
