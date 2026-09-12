@@ -22,3 +22,11 @@ models/*.safetensors
 # Logs
 *.log
 logs/
+# Virtualenv
+.venv/
+
+# Test / coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/

@@ -1,0 +1,7 @@
+# Web layer only. No ML dependencies, so tests and linting can install
+# a small environment and run without downloading torch.
+flask==3.0.3
+flask-cors==4.0.1
+flask-limiter==3.8.0
+python-dotenv==1.0.1
+gunicorn==22.0.0

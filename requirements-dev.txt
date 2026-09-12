@@ -1,0 +1,7 @@
+# Test and lint environment. Deliberately excludes torch/transformers:
+# the model is faked in tests, so CI installs in seconds instead of minutes.
+-r requirements-base.txt
+
+pytest==8.3.3
+pytest-cov==5.0.0
+ruff==0.6.9

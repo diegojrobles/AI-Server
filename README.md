@@ -1,69 +1,92 @@
 # AI Server
 
-A production-ready REST API server for running AI models.
+[![CI](https://github.com/diegojrobles/AI-Server/actions/workflows/test.yml/badge.svg)](https://github.com/diegojrobles/AI-Server/actions/workflows/test.yml)
+
+A REST API server for running AI models behind a single interface.
+
+**Current state:** Flask API serving a local HuggingFace sentiment model, with API-key
+auth and rate limiting.
+
+**Where it is going:** an async FastAPI gateway that fronts OpenAI, Anthropic and Google
+behind one schema, with streaming, per-client rate limiting, provider fallback, and
+published benchmarks. The plan is in [ROADMAP.md](ROADMAP.md); progress is in
+[docs/dev-log.md](docs/dev-log.md).
 
 ## Features
-- Sentiment analysis using transformers
-- RESTful API with Flask
-- API key authentication
+
+- Sentiment analysis via `transformers`
+- API key authentication (`X-API-Key`)
+- Per-IP rate limiting
 - Environment-based configuration
-- Easy model swapping
+- Model loaded lazily on first request, so the process starts fast and tests run offline
 
 ## Setup
 
-1. Clone the repository:
 ```bash
-   git clone https://github.com/YOUR-USERNAME/ai-server.git
-   cd ai-server
+git clone https://github.com/diegojrobles/AI-Server.git
+cd AI-Server
+
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+
+pip install -r requirements.txt  # runtime, includes torch
+cp .env.example .env             # then edit API_KEY
+
+python run.py
 ```
 
-2. Create virtual environment:
-```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+### Dependency layout
+
+| File | Contents | Use |
+| --- | --- | --- |
+| `requirements-base.txt` | web layer only | shared |
+| `requirements.txt` | base + torch/transformers | running the server |
+| `requirements-dev.txt` | base + pytest/ruff | tests and CI, no torch |
+
+## API
+
+### `GET /health`
+
+```json
+{ "status": "healthy", "model": "distilbert-...", "model_loaded": false }
 ```
 
-3. Install dependencies:
+### `POST /predict`
+
 ```bash
-   pip install -r requirements.txt
+curl -X POST http://localhost:5000/predict \
+  -H "X-API-Key: $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "I love this product!"}'
 ```
 
-4. Create `.env` file:
-
-HOST=0.0.0.0
-PORT=5000
-DEBUG=True
-MODEL_NAME=distilbert-base-uncased-finetuned-sst-2-english
-API_KEY=your-secret-key-here
-
-5. Run the server:
-```bash
-   python run.py
+```json
+{ "input": "I love this product!", "prediction": [{ "label": "POSITIVE", "score": 0.99 }] }
 ```
 
-## API Endpoints
+Returns `400` on a missing or empty `text`, `401` on a bad key, `429` past the limit.
 
-### Health Check
+### `GET /models`
+
+Lists the current and available model names.
+
+## Development
+
 ```bash
-GET /health
+pip install -r requirements-dev.txt
+PYTHONPATH=. pytest        # 13 tests, no network, no model download
+ruff check . && ruff format --check .
 ```
 
-### Predict
-```bash
-POST /predict
-Headers: X-API-Key: your-secret-key-here
-Body: {"text": "Your text here"}
-```
+Tests fake the model handler via `server.set_model_handler()`, so the suite runs in
+well under a second and CI never downloads torch.
 
-### List Models
-```bash
-GET /models
-```
+## Docker
 
-## Testing
 ```bash
-python test_server.py
+docker compose up --build
 ```
 
 ## License
-MIT
+
+MIT — see [LICENSE](LICENSE).
