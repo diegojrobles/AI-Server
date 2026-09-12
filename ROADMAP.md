@@ -15,7 +15,10 @@ is meant to be defensible in an interview on its own.
   split it in place and do the first half.
 - Every commit updates this file (check the box) and appends 2 lines to
   `docs/dev-log.md` saying what changed and why.
-- Never commit secrets, API keys, or `.env`.
+- Never commit secrets, API keys, or `.env`. `scripts/secret_scan.py --staged` must
+  pass before every commit, and `--all` before every push. This is a hard gate, not
+  a suggestion: a credential that reaches the remote is compromised and has to be
+  rotated, not deleted.
 - No provider network calls in CI. `MockProvider` is what tests run against.
 
 ---
@@ -106,7 +109,7 @@ This is the part that makes the resume line true.
 - [ ] 67. Chaos tests: injected latency, injected 500s, injected partial streams.
 - [ ] 68. Timeout budget propagation so a retry cannot exceed the client's total deadline.
 - [ ] 69. Secrets hygiene pass: confirm no key ever reaches logs or error bodies; add a test that asserts it.
-- [ ] 70. Dependency audit (`pip-audit`) wired into CI.
+- [x] 70. Dependency audit (`pip-audit`) wired into CI. *(done early, alongside secret scanning)*
 - [ ] 71. Container hardening: non-root user, pinned base image digest.
 - [ ] 72. Load-shedding policy documented in `docs/operations.md`.
 

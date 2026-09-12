@@ -14,3 +14,17 @@ skips torch entirely, deferred the `transformers` import and the model instantia
 of import time (importing `app.server` used to download a model), and replaced the old
 script with 13 real tests against Flask's test client. Suite runs in 0.04s. Added ruff,
 a 3.11/3.12 matrix, and a lint job.
+
+## 2026-09-12 — Secret scanning as a hard gate
+
+Added `scripts/secret_scan.py`: a dependency-free scanner for provider tokens
+(GitHub, OpenAI, Anthropic, Google, AWS, Slack, Stripe), private keys, JWTs,
+credentials in connection URLs, auth headers, and high-entropy secret assignments,
+plus a path denylist for `.env`, `*.pem`, `id_rsa` and friends. Entropy and
+placeholder filters keep `change-me` and `${VAR}` from generating noise.
+
+Wired into three places so it cannot be skipped by accident: a `.githooks/pre-commit`
+hook, a mandatory step in the automated daily job, and a CI job that scans the full
+history on every push. Added `pip-audit` in the same CI job (roadmap item 70, pulled
+forward). Verified against 12 planted credentials — all caught, no false positives on
+the existing tree, and the repo's entire history scans clean.

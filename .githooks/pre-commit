@@ -1,0 +1,15 @@
+#!/bin/sh
+# Block commits that contain credentials or key material.
+#
+# Enable once per clone:
+#     git config core.hooksPath .githooks
+#
+# Emergency bypass is `git commit --no-verify`. If you reach for it, the value
+# is already staged — check it by hand first. A secret that reaches a remote is
+# compromised and must be rotated, not deleted.
+
+if ! python3 scripts/secret_scan.py --staged; then
+    echo
+    echo "pre-commit: blocked. Nothing was committed."
+    exit 1
+fi

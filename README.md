@@ -81,6 +81,29 @@ ruff check . && ruff format --check .
 Tests fake the model handler via `server.set_model_handler()`, so the suite runs in
 well under a second and CI never downloads torch.
 
+### Secret scanning
+
+`scripts/secret_scan.py` blocks credentials and key material from reaching the
+repo. No third-party dependencies, so it behaves identically locally and in CI.
+
+```bash
+git config core.hooksPath .githooks   # once per clone: refuse commits with secrets
+
+python3 scripts/secret_scan.py --staged   # what is about to be committed
+python3 scripts/secret_scan.py --tree     # every tracked file
+python3 scripts/secret_scan.py --all      # tracked files plus full history
+```
+
+It detects provider tokens (GitHub, OpenAI, Anthropic, Google, AWS, Slack,
+Stripe), private keys, JWTs, credentials embedded in connection URLs, auth
+headers, and high-entropy secret assignments, and refuses paths like `.env`,
+`*.pem` and `id_rsa`. Placeholders such as `change-me` are ignored. For a value
+that is genuinely not a secret, append `# pragma: allowlist secret` to the line;
+suppressions are printed on every run so they cannot rot unnoticed.
+
+CI runs the scan over the entire history on every push, alongside `pip-audit`
+for known CVEs in dependencies.
+
 ## Docker
 
 ```bash

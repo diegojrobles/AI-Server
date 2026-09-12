@@ -50,3 +50,21 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - run: ruff check .
       - run: ruff format --check .
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history, so the scan covers every commit ever pushed
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Scan for leaked secrets
+        run: python3 scripts/secret_scan.py --all
+
+      - name: Audit dependencies for known CVEs
+        run: |
+          pip install pip-audit==2.7.3
+          pip-audit -r requirements-base.txt -r requirements-dev.txt --strict
