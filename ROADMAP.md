@@ -26,13 +26,13 @@ The workflow currently runs `python -m pytest`, but `pytest` is not in
 `requirements.txt` and `test_server.py` does live HTTP against `localhost:5000`.
 CI cannot be passing. Nothing else matters until this is true.
 
-- [ ] 1. Split dependencies: `requirements.txt` (runtime) and `requirements-dev.txt` (pytest, ruff, httpx). Pin versions.
-- [ ] 2. Rewrite `test_server.py` as real pytest tests using Flask's `test_client`, with the model faked. No live server, no network.
-- [ ] 3. Break the import-time side effect: `ModelHandler()` runs on import of `app.server`, so importing the app downloads a model. Move it behind a factory/lazy accessor so tests import instantly.
-- [ ] 4. Modernize the workflow: `actions/checkout@v4`, `actions/setup-python@v5`, pip caching, Python 3.11 + 3.12 matrix.
-- [ ] 5. Add `ruff` config in `pyproject.toml` and a lint job; fix what it flags.
-- [ ] 6. Add `LICENSE` (README claims MIT, the file does not exist) and `.env.example`.
-- [ ] 7. Fix the README: real clone URL (it still says `YOUR-USERNAME`), correct test instructions, CI badge.
+- [x] 1. Split dependencies: `requirements.txt` (runtime) and `requirements-dev.txt` (pytest, ruff, httpx). Pin versions.
+- [x] 2. Rewrite `test_server.py` as real pytest tests using Flask's `test_client`, with the model faked. No live server, no network.
+- [x] 3. Break the import-time side effect: `ModelHandler()` runs on import of `app.server`, so importing the app downloads a model. Move it behind a factory/lazy accessor so tests import instantly.
+- [x] 4. Modernize the workflow: `actions/checkout@v4`, `actions/setup-python@v5`, pip caching, Python 3.11 + 3.12 matrix.
+- [x] 5. Add `ruff` config in `pyproject.toml` and a lint job; fix what it flags.
+- [x] 6. Add `LICENSE` (README claims MIT, the file does not exist) and `.env.example`.
+- [x] 7. Fix the README: real clone URL (it still says `YOUR-USERNAME`), correct test instructions, CI badge.
 - [ ] 8. Add `CONTRIBUTING.md` with the local dev loop, and a `Makefile` for `make test` / `make lint` / `make run`.
 
 ## Phase 1 — FastAPI + Pydantic + async (17 days)
