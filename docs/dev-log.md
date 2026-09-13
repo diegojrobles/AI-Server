@@ -28,3 +28,13 @@ hook, a mandatory step in the automated daily job, and a CI job that scans the f
 history on every push. Added `pip-audit` in the same CI job (roadmap item 70, pulled
 forward). Verified against 12 planted credentials — all caught, no false positives on
 the existing tree, and the repo's entire history scans clean.
+
+## 2026-09-13 — Patched 7 CVEs the new audit caught
+
+The `pip-audit` job added yesterday turned CI red on its first run, which is the
+tool doing its job: flask 3.0.3, flask-cors 4.0.1 (four separate advisories),
+python-dotenv 1.0.1 and pytest 8.3.3 all carried known vulnerabilities. Bumped to
+flask 3.1.3, flask-cors 6.0.0, python-dotenv 1.2.2, pytest 9.0.3 and pytest-cov
+7.0.0. flask-cors crossing a major version was the only real risk; the plain
+`CORS(app)` call is unchanged in 6.x and the suite passes untouched. Audit now
+reports no known vulnerabilities.
