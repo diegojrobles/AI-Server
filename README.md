@@ -73,10 +73,14 @@ Lists the current and available model names.
 ## Development
 
 ```bash
-pip install -r requirements-dev.txt
-PYTHONPATH=. pytest        # 13 tests, no network, no model download
-ruff check . && ruff format --check .
+make dev      # create .venv and install the test/lint dependencies
+make test     # 25 tests, no network, no model download
+make lint     # ruff check + ruff format --check
+make check    # all three gates CI enforces
 ```
+
+`make help` lists every target. The full loop — setup, the gate, the commit
+rules — is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Tests fake the model handler via `server.set_model_handler()`, so the suite runs in
 well under a second and CI never downloads torch.

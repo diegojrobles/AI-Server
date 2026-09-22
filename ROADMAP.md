@@ -36,7 +36,7 @@ CI cannot be passing. Nothing else matters until this is true.
 - [x] 5. Add `ruff` config in `pyproject.toml` and a lint job; fix what it flags.
 - [x] 6. Add `LICENSE` (README claims MIT, the file does not exist) and `.env.example`.
 - [x] 7. Fix the README: real clone URL (it still says `YOUR-USERNAME`), correct test instructions, CI badge.
-- [ ] 8. Add `CONTRIBUTING.md` with the local dev loop, and a `Makefile` for `make test` / `make lint` / `make run`.
+- [x] 8. Add `CONTRIBUTING.md` with the local dev loop, and a `Makefile` for `make test` / `make lint` / `make run`.
 
 ## Phase 1 — FastAPI + Pydantic + async (17 days)
 

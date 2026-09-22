@@ -38,3 +38,23 @@ flask 3.1.3, flask-cors 6.0.0, python-dotenv 1.2.2, pytest 9.0.3 and pytest-cov
 7.0.0. flask-cors crossing a major version was the only real risk; the plain
 `CORS(app)` call is unchanged in 6.x and the suite passes untouched. Audit now
 reports no known vulnerabilities.
+
+## 2026-09-22 — One command for the dev loop
+
+Phase 0 ends with the loop being reproducible instead of remembered. Added a
+`Makefile` (`dev`, `test`, `lint`, `format`, `check`, `scan`, `audit`, `run`,
+`hooks`, `docker`, `clean`) that bootstraps `.venv` on demand via stamp files, so
+dependencies reinstall only when a requirements file actually changes, and
+`CONTRIBUTING.md` documenting the setup, the gate, and the one-item-per-commit
+rule. `make check` is lint + tests + full-history secret scan — the same three
+gates CI enforces.
+
+Console scripts are invoked as `python -m pip` / `-m pytest` / `-m ruff` rather
+than `.venv/bin/pip`: those shebang scripts hard-code the interpreter path and
+break the moment the checkout moves, which is exactly how this broke first try.
+Added `tests/test_makefile.py` (12 tests) so the three copies of the dev loop —
+Makefile, CONTRIBUTING.md, CI workflow — cannot drift apart silently: every
+`.PHONY` target must exist and carry a `##` description (that is what `make help`
+prints), every `make x` in CONTRIBUTING.md must resolve, `check` must keep
+depending on lint/test/scan, and CI must still run all three.
+
