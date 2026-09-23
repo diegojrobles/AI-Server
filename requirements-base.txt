@@ -1,7 +1,27 @@
 # Web layer only. No ML dependencies, so tests and linting can install
 # a small environment and run without downloading torch.
+#
+# Two web stacks live here on purpose during the Flask -> FastAPI migration
+# (ROADMAP Phase 1). The Flask entries are deleted in item 21, once every
+# route has been ported and the test suite runs against the ASGI app.
+
+# --- Current (Flask) stack: still serving /health, /models, /predict. ---
 flask==3.1.3
 flask-cors==6.0.0
 flask-limiter==3.8.0
-python-dotenv==1.2.2
 gunicorn==22.0.0
+
+# --- Incoming (FastAPI) stack. ---
+# pydantic is pinned explicitly rather than floating in as a FastAPI
+# transitive dependency: the request/response schemas in items 10 and 29 are
+# the contract this gateway is built around, and a silent minor bump is not
+# something that should be able to change validation behaviour.
+fastapi==0.141.1
+pydantic==2.13.5
+pydantic-settings==2.15.0
+# The [standard] extra is what pulls uvloop and httptools, i.e. the reason
+# the async numbers in Phase 4 will be worth measuring at all.
+uvicorn[standard]==0.53.0
+
+# --- Shared. ---
+python-dotenv==1.2.2

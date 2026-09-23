@@ -58,3 +58,26 @@ Makefile, CONTRIBUTING.md, CI workflow — cannot drift apart silently: every
 prints), every `make x` in CONTRIBUTING.md must resolve, `check` must keep
 depending on lint/test/scan, and CI must still run all three.
 
+
+## 2026-09-23 — The FastAPI stack arrives (as dependencies)
+
+Phase 1 opens by putting `fastapi==0.141.1`, `pydantic==2.13.5`,
+`pydantic-settings==2.15.0` and `uvicorn[standard]==0.53.0` into
+`requirements-base.txt` — the base layer, not the runtime one, so the test
+environment gets the whole web stack without ever touching torch. Flask and
+FastAPI now coexist in that file on purpose; the Flask entries come out in item
+21, once every route has been ported. `pydantic` is pinned explicitly instead of
+arriving as a FastAPI transitive: the schemas in items 10 and 29 are the
+contract the gateway is built on, and a silent minor bump should not be able to
+change validation behaviour underneath it. `pip-audit --strict` is clean on the
+new set.
+
+Added `tests/test_requirements.py` (17 tests) so the manifests cannot rot:
+everything must be pinned with `==`, no package may be pinned to two different
+versions across the three layers, the FastAPI stack must stay in the base file,
+`uvicorn` must keep its `[standard]` extra (that extra is uvloop and httptools —
+the reason the Phase 4 numbers will mean anything), torch and transformers must
+stay out of the dev set, and the installed environment must match the pins so a
+stale `.venv` fails loudly here rather than confusingly later. One of them also
+ties ruff's `target-version` to the oldest python in the CI matrix, so the linter
+can never start allowing syntax a tested interpreter cannot run.
