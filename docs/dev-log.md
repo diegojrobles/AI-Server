@@ -81,3 +81,28 @@ stay out of the dev set, and the installed environment must match the pins so a
 stale `.venv` fails loudly here rather than confusingly later. One of them also
 ties ruff's `target-version` to the oldest python in the CI matrix, so the linter
 can never start allowing syntax a tested interpreter cannot run.
+
+Item 10 defines the HTTP contract in `app/schemas.py`: `PredictRequest`,
+`Prediction`, `PredictResponse`, `ErrorResponse`, `HealthResponse`. They are
+written to match the JSON the Flask handlers emit today byte for byte, so the
+port in items 12-14 is provably a framework swap and not a behaviour change —
+`tests/test_schemas.py` pins each wire shape against the current output. One
+deliberate divergence: requests set `extra="forbid"`, because the old handlers
+ignored unknown keys and answered a typo'd `{"txt": ...}` with a misleading
+"Missing text field" instead of naming the bad key. Responses stay open, since
+adding a response field is backwards-compatible.
+
+`PredictRequest` validates that text is non-blank but returns it unmodified —
+`PredictResponse.input` echoes the caller's string back, and silently trimming
+it would make that echo a lie. Every model publishes a `json_schema_extra`
+example so the OpenAPI docs in item 24 have something to render.
+
+Worth recording a correction: the first draft set `protected_namespaces=()` on
+`HealthResponse` to stop Pydantic warning about `model_loaded`, and asserted the
+absence of that warning in a test. Checking the pinned version rather than
+trusting the habit showed 2.13.5 protects `("model_validate", "model_dump")`,
+not the bare `model_` prefix — so nothing collided, the override was cargo cult,
+and the test passed vacuously. Both are gone. In their place the suite reloads
+the module with warnings promoted to errors, which does fail if a future field
+is named something like `model_dump_url`; that was verified to trip rather than
+assumed to.
