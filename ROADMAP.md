@@ -42,7 +42,7 @@ CI cannot be passing. Nothing else matters until this is true.
 
 - [x] 9. Add `fastapi`, `uvicorn[standard]`, `pydantic-settings` to requirements.
 - [x] 10. Define Pydantic models: `PredictRequest`, `PredictResponse`, `ErrorResponse`, `HealthResponse`.
-- [ ] 11. Move `config/settings.py` to `pydantic-settings` `BaseSettings` with validation and typed fields.
+- [x] 11. Move `config/settings.py` to `pydantic-settings` `BaseSettings` with validation and typed fields.
 - [ ] 12. New `app/api.py`: FastAPI app skeleton with `/health` ported.
 - [ ] 13. Port `/models`.
 - [ ] 14. Port `/predict` with Pydantic request validation.

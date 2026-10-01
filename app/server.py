@@ -7,7 +7,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
 from app.model_handler import ModelHandler
-from config.settings import Config
+from config.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ limiter = Limiter(
     get_remote_address,
     app=app,
     default_limits=["100 per hour"],
-    enabled=Config.RATELIMIT_ENABLED,
+    enabled=settings.ratelimit_enabled,
 )
 
 # The model is loaded on first use rather than at import time. Importing
@@ -45,8 +45,8 @@ def require_api_key(f):
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if Config.API_KEY:
-            if request.headers.get("X-API-Key") != Config.API_KEY:
+        if settings.api_key is not None:
+            if request.headers.get("X-API-Key") != settings.api_key:
                 return jsonify({"error": "Invalid API key"}), 401
         return f(*args, **kwargs)
 
@@ -59,7 +59,7 @@ def health_check():
     return jsonify(
         {
             "status": "healthy",
-            "model": Config.MODEL_NAME,
+            "model": settings.model_name,
             "model_loaded": _model_handler is not None and _model_handler.is_ready,
         }
     ), 200
@@ -92,7 +92,7 @@ def list_models():
     """List available models."""
     return jsonify(
         {
-            "current_model": Config.MODEL_NAME,
+            "current_model": settings.model_name,
             "available_models": [
                 "distilbert-base-uncased-finetuned-sst-2-english",
                 "bert-base-uncased",
@@ -103,5 +103,5 @@ def list_models():
 
 
 if __name__ == "__main__":
-    logger.info("Starting server on %s:%s", Config.HOST, Config.PORT)
-    app.run(host=Config.HOST, port=Config.PORT, debug=Config.DEBUG)
+    logger.info("Starting server on %s:%s", settings.host, settings.port)
+    app.run(host=settings.host, port=settings.port, debug=settings.debug)

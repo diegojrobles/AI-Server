@@ -106,3 +106,31 @@ and the test passed vacuously. Both are gone. In their place the suite reloads
 the module with warnings promoted to errors, which does fail if a future field
 is named something like `model_dump_url`; that was verified to trip rather than
 assumed to.
+
+Item 11 replaces `class Config` with a frozen `Settings(BaseSettings)`. The old
+version read `os.getenv` at class-definition time with hand-written `int()` casts
+and a `_flag` helper, which meant nothing was typed, nothing was range-checked,
+and -- the reason this moved up the list -- bad booleans failed silently:
+`RATELIMIT_ENABLED=ture` fell outside `_flag`'s allow-list and quietly disabled
+rate limiting. Now `PORT` is bounded to 1-65535 and `MAX_LENGTH` to >= 1, both at
+startup instead of at bind or tokenize time, and an unparseable bool is a
+`ValidationError` before the server exists. `MAX_LENGTH` deliberately has no upper
+bound: the real ceiling is the tokenizer's `model_max_length`, so hard-coding a
+number would be a second source of truth free to disagree with the first.
+
+Env var names and precedence are unchanged -- real environment over `.env` over
+defaults, matched case-insensitively -- so `.env.example` needed no renames, only
+notes on the new bounds. `API_KEY=` with the value deleted now resolves to `None`
+rather than an empty string; the old guard `if Config.API_KEY` got this right by
+accident, and making it explicit lets the auth dependency in item 15 test
+`is None` and be correct. The one behavioural addition is a warning when `DEBUG`
+is true while bound to `0.0.0.0` or `::`, which publishes the Werkzeug console to
+anything that can reach the port. A warning and not an error because `HOST`
+defaults to `0.0.0.0` for the container, so raising would make `DEBUG=True`
+unusable in exactly the case it is wanted.
+
+`Settings` is frozen, which makes item 53 (config reload without restart) a swap
+of one immutable instance for another rather than a question of who is allowed to
+mutate shared state. `tests/test_settings.py` adds 52 cases; each one passes
+`_env_file=None` unless it is testing `.env` loading, since otherwise the suite
+would read whatever `.env` sits in the working directory and stop being a test.

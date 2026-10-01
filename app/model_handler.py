@@ -1,6 +1,6 @@
 import logging
 
-from config.settings import Config
+from config.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +23,8 @@ class ModelHandler:
         from transformers import pipeline  # deferred: keeps import cost off the web path
 
         try:
-            logger.info("Loading model: %s", Config.MODEL_NAME)
-            self.model = pipeline("sentiment-analysis", model=Config.MODEL_NAME)
+            logger.info("Loading model: %s", settings.model_name)
+            self.model = pipeline("sentiment-analysis", model=settings.model_name)
             logger.info("Model loaded successfully")
         except Exception:
             logger.exception("Failed to load model")
@@ -40,7 +40,7 @@ class ModelHandler:
             raise RuntimeError("Model not loaded")
 
         try:
-            return self.model(text, max_length=Config.MAX_LENGTH, truncation=True)
+            return self.model(text, max_length=settings.max_length, truncation=True)
         except Exception:
             logger.exception("Prediction error")
             raise

@@ -1,7 +1,7 @@
 import os
 
-# Must be set before config.settings is imported, since Config reads the
-# environment at class-definition time.
+# Must be set before config.settings is imported: the module builds its
+# Settings instance at import time, reading the environment once.
 os.environ.setdefault("API_KEY", "test-key")
 os.environ.setdefault("RATELIMIT_ENABLED", "False")
 os.environ.setdefault("DEBUG", "False")
